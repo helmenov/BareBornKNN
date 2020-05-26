@@ -4,27 +4,36 @@
 #include <math.h>
 #include <time.h>
 
+#ifdef CONST_SEED
+#define MySeed 2020
+#else
+#define MySeed ((unsigned)time(NULL))
+#endif
+
+#define SizeSeries 10
+
 int main(void)
 {
   int i;
   FILE *fp;
-  
+
   /* 現在時間で乱数ジェネレータを初期化する */
-  srand((unsigned)time(NULL)); 
-  
-  /* rand()は0からRAND_MAXまでの数値を返す*/
-  for(i=0;i<10;i++)
-    printf("%d\n",rand());
-  
+  srand(MySeed);
+
+  /* rand()は0からRAND_MAXまでの数値を1つ返す*/
+  for (i = 0; i < SizeSeries; i++)
+    printf("%d\n", rand());
+
   /* ファイルの書き出し */
   fp = fopen("test.dat", "w");
-  if(fp == NULL){
+  if (fp == NULL)
+  {
     fprintf(stderr, "ファイルを開けません.");
     exit(EXIT_FAILURE);
   }
-  for(i=0;i<10;i++)
-    fprintf(fp,"%d\n",rand());
+  for (i = 0; i < SizeSeries; i++)
+    fprintf(fp, "%d\n", rand());
   fclose(fp);
 
-  return(0);
+  return 0;
 }

@@ -5,35 +5,43 @@
 #include <stdlib.h>
 #include <math.h>
 
+#define SizeBuff 128
+#define LenFilename 100
+#define NumTrainImg 2000
+#define SizeRow 28
+#define SizeCol 28
+
 int main(void)
 {
-    int i,j,Image;                              //■ ループ用変数
+	int iRow, iCol, iImg; //■ ループ用変数
 
-    unsigned char *Pix_tr;                      //■ バイナリ画像データ格納用
-    char buff[128];
-    char filename[100];                         //■ ファイルネーム格納用
-    FILE *fp;                                   //■ ファイルポインタ
+	unsigned char *Pix_tr; //■ バイナリ画像データ格納用
+	char buff[SizeBuff];
+	char filename[LenFilename]; //■ ファイルネーム格納用
+	FILE *fp;					//■ ファイルポインタ
 
-    Pix_tr  = calloc( 2000*28*28, sizeof(unsigned char));
+	Pix_tr = calloc(NumTrainImg * SizeRow * SizeCol, sizeof(unsigned char));
 
-    for(Image=0;Image<2000;Image++){
-	/* sprintf関数でファイル名を作成する */
-	sprintf(filename,"./train_data/d%d.pgm",Image);
-    
-	fp=fopen(filename, "rb" );            //■ ファイルを開く
-	fgets(buff,128,fp);                   //■ ファイルの識別符号を読み込み
-	fgets(buff,128,fp);                   //■ 画像サイズの読み込み
-	fgets(buff,128,fp);                   //■ 最大輝度値の読み込み
-    
-	//■ 画像データの読み込み
-	for(i=0;i<28;i++){
-	    for(j=0;j<28;j++){
-		Pix_tr[Image*28*28+i*28+j] = fgetc(fp);
-	    }
+	for (iImg = 0; iImg < NumTrainImg; iImg++)
+	{
+		/* sprintf関数でファイル名を作成する */
+		sprintf(filename, "./train_data/d%d.pgm", iImg);
+
+		fp = fopen(filename, "rb");	   //■ ファイルを開く
+		fgets(buff, sizeof(buff), fp); //■ ファイルの識別符号を読み込み
+		fgets(buff, sizeof(buff), fp); //■ 画像サイズの読み込み
+		fgets(buff, sizeof(buff), fp); //■ 最大輝度値の読み込み
+
+		//■ 画像データの読み込み
+		for (iRow = 0; iRow < SizeRow; iRow++)
+		{
+			for (iCol = 0; iCol < SizeCol; iCol++)
+			{
+				Pix_tr[iImg * SizeRow * SizeCol + iRow * SizeCol + iCol] = fgetc(fp);
+			}
+		}
+		fclose(fp);
 	}
-	fclose(fp);
-    }
 
-
-    return(0);
+	return 0;
 }

@@ -7,84 +7,89 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#define  PI 3.14159265
+#define PI 3.14159265
 #include "rotation.h"
 
 void main(void)
 {
-  int           i,j;                 // For loop
-  int           xsize=28,ysize=28;   // ‰æ‘œƒTƒCƒY
-  double        theta=0;             // ‰ñ“]Šp“xi“xj
-  double        scale_x=2.0;         // ‰¡•ûŒü‚Ì”{—¦
-  double        scale_y=0.5;         // c•ûŒü‚Ì”{—¦
-  unsigned char **Image;             // input image
-  unsigned char **after;             // output image
-  char          filename[100];       // filename
-  char          buff[128];
-  FILE          *fp;                 // file pointer
-  
+  int i, j;                   // For loop
+  int xsize = 28, ysize = 28; // ç”»åƒã‚µã‚¤ã‚º
+  double theta = 0;           // å›è»¢è§’åº¦ï¼ˆåº¦ï¼‰
+  double scale_x = 2.0;       // æ¨ªæ–¹å‘ã®å€ç‡
+  double scale_y = 0.5;       // ç¸¦æ–¹å‘ã®å€ç‡
+  unsigned char **Image;      // input image
+  unsigned char **after;      // output image
+  char filename[100];         // filename
+  char buff[128];
+  FILE *fp; // file pointer
+
   /* read binary image */
-  sprintf(filename,"../test_image/sample.pgm");
-  
-  if(( fp=fopen(filename, "rb" ))==NULL){
-    fprintf(stderr,"%s can't open! \n",filename);
+  sprintf(filename, "../test_image/sample.pgm");
+
+  if ((fp = fopen(filename, "rb")) == NULL)
+  {
+    fprintf(stderr, "%s can't open! \n", filename);
     exit(-1);
   }
-  
-  /* ƒƒ‚ƒŠ‚ÌŠm•Û */
-  Image = (unsigned char**)calloc(ysize+1,sizeof(unsigned char*));
-  after = (unsigned char**)calloc(ysize+1,sizeof(unsigned char*));
-  if( Image == NULL || after == NULL){
+
+  /* ãƒ¡ãƒ¢ãƒªã®ç¢ºä¿ */
+  Image = (unsigned char **)calloc(ysize + 1, sizeof(unsigned char *));
+  after = (unsigned char **)calloc(ysize + 1, sizeof(unsigned char *));
+  if (Image == NULL || after == NULL)
+  {
     puts("Memory allocate error!!");
     exit(1);
   }
-  for(i=0;i<=ysize;i++){
-    Image[i] = (unsigned char*)calloc(xsize+1,sizeof(unsigned char));
-    after[i] = (unsigned char*)calloc(xsize+1,sizeof(unsigned char));
-    if( Image[i] == NULL || after[i] == NULL){
+  for (i = 0; i <= ysize; i++)
+  {
+    Image[i] = (unsigned char *)calloc(xsize + 1, sizeof(unsigned char));
+    after[i] = (unsigned char *)calloc(xsize + 1, sizeof(unsigned char));
+    if (Image[i] == NULL || after[i] == NULL)
+    {
       puts("Memory allocate error!!");
       exit(1);
     }
   }
- 
- 	fgets(buff,128,fp);                        //¡ ƒtƒ@ƒCƒ‹‚Ì¯•Ê•„†‚ğ“Ç‚İ‚İ
-  fgets(buff,128,fp);                        //¡ ‰æ‘œƒTƒCƒY‚Ì“Ç‚İ‚İ
-  fgets(buff,128,fp);
-  
-  for(j=0;j<ysize;j++)
-  	fread(Image[j],sizeof(unsigned char),xsize,fp);
-  
+
+  fgets(buff, 128, fp); //â–  ãƒ•ã‚¡ã‚¤ãƒ«ã®è­˜åˆ¥ç¬¦å·ã‚’èª­ã¿è¾¼ã¿
+  fgets(buff, 128, fp); //â–  ç”»åƒã‚µã‚¤ã‚ºã®èª­ã¿è¾¼ã¿
+  fgets(buff, 128, fp);
+
+  for (j = 0; j < ysize; j++)
+    fread(Image[j], sizeof(unsigned char), xsize, fp);
+
   fclose(fp);
-  
+
   /* image processing */
   //NN_affine(Image,after,xsize,ysize,theta,scale_x,scale_y);
   //Linear_affine(Image,after,xsize,ysize,theta,scale_x,scale_y);
-  Spline_affine(Image,after,xsize,ysize,theta,scale_x,scale_y);
+  Spline_affine(Image, after, xsize, ysize, theta, scale_x, scale_y);
   /* write binary image */
-  
-  sprintf(filename,"output.pgm");
-  
-  if(( fp=fopen(filename, "wb" ))==NULL){
-    fprintf(stderr,"%s can't open\n",filename);
+
+  sprintf(filename, "output.pgm");
+
+  if ((fp = fopen(filename, "wb")) == NULL)
+  {
+    fprintf(stderr, "%s can't open\n", filename);
     exit(-1);
   }
-  
-  fprintf(fp,"P5\n");                        //¡ ƒtƒ@ƒCƒ‹‚Ì¯•Ê•„†‚ğ‘‚«‚Ş
-  fprintf(fp,"%d %d\n",ysize,xsize);         //¡ ‰æ‘œƒTƒCƒY‚ğ‘‚«‚Ş
-  fprintf(fp,"255\n");                       //¡ Å‘å‹P“x’l‚ğ‘‚«‚Ş
 
-  for(j=0;j<ysize;j++)
-    fwrite(after[j],sizeof(unsigned char),xsize,fp);
+  fprintf(fp, "P5\n");                  //â–  ãƒ•ã‚¡ã‚¤ãƒ«ã®è­˜åˆ¥ç¬¦å·ã‚’æ›¸ãè¾¼ã‚€
+  fprintf(fp, "%d %d\n", ysize, xsize); //â–  ç”»åƒã‚µã‚¤ã‚ºã‚’æ›¸ãè¾¼ã‚€
+  fprintf(fp, "255\n");                 //â–  æœ€å¤§è¼åº¦å€¤ã‚’æ›¸ãè¾¼ã‚€
+
+  for (j = 0; j < ysize; j++)
+    fwrite(after[j], sizeof(unsigned char), xsize, fp);
   fclose(fp);
-  
-  
-  /* —Ìˆæ‚ÌŠJ•ú */
-  for(i=0;i<=ysize;i++){
+
+  /* é ˜åŸŸã®é–‹æ”¾ */
+  for (i = 0; i <= ysize; i++)
+  {
     free(Image[i]);
     free(after[i]);
   }
 
   free(Image);
   free(after);
-  
-}/*end_main*/
+
+} /*end_main*/
