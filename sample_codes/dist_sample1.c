@@ -27,8 +27,8 @@ int main(void)
 	{
 
 		/* sprintf関数でファイル名を作成する */
-		sprintf(filename, "./test_data/d%d.pgm", iImg);
-		//	printf("画像 %sを開きます\n",filename);
+		sprintf(filename, "..\\MNIST\\test_data\\d%d.pgm", iImg);
+		printf("画像 %sを開きます\n",filename);
 
 		fp = fopen(filename, "rb");	   //■ ファイルを開く
 		fgets(buff, sizeof(buff), fp); //■ ファイルの識別符号を読み込み
