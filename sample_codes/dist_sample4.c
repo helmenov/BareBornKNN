@@ -5,160 +5,196 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define DIM 784
+const unsigned int NumTesImg = 100;
+const unsigned int NumTrImg = 2000;
+const unsigned int SizeRow = 28;
+const unsigned int SizeCol = 28;
+const unsigned int SizeBuff = 128;
+const unsigned int LenFilename = 100;
+const unsigned char WHITE = 255;
+const unsigned int RefImgNo = 1;
+
+#define DIM (SizeRow * SizeCol)
 
 int main(void)
 {
-    int i,j,k,Image;                            //■ ループ用変数
-    unsigned char *Pix_tes;                     //■ バイナリ画像データ格納用
-    unsigned char *Pix_tr;                      //■ バイナリ画像データ格納用
-    char buff[128];
-    char filename[100];                         //■ ファイルネーム格納用
-    FILE *fp;                                   //■ ファイルポインタ
-    int tes_i, tr_i;
-    int tes_label[100], tr_label[2000];
-    double fsum, *tes_vec, *tr_vec;
+	int iRow, iCol, iDim, p,q;		//■ ループ用変数
+	unsigned char *Pix_tes; //■ バイナリ画像データ格納用
+	unsigned char *Pix_tr;	//■ バイナリ画像データ格納用
+	char buff[SizeBuff];
+	char filename[LenFilename]; //■ ファイルネーム格納用
+	FILE *fp;					//■ ファイルポインタ
+	int iTesImg, iTrImg;
+	int tes_label[NumTesImg], tr_label[NumTrImg];
+	double fsum, *tes_vec, *tr_vec;
 
-    int    dist_no[2000], dist_nobuf;
-    double dist_val[2000], dist_valbuf;
-    int    dist_class[2000], dist_classbuf;
+	int dist_no[NumTrImg], dist_nobuf;
+	double dist_val[NumTrImg], dist_valbuf;
+	int dist_class[NumTrImg], dist_classbuf;
 
+	Pix_tes = calloc(NumTesImg * DIM, sizeof(unsigned char));
+	Pix_tr = calloc(NumTrImg * DIM, sizeof(unsigned char));
+	tes_vec = calloc(NumTesImg * DIM, sizeof(double));
+	tr_vec = calloc(NumTrImg * DIM, sizeof(double));
 
-    Pix_tes = calloc( 100*28*28, sizeof(unsigned char));
-    Pix_tr  = calloc( 2000*28*28, sizeof(unsigned char));
-    tes_vec = calloc( 100*DIM, sizeof(double));
-    tr_vec  = calloc( 2000*DIM, sizeof(double));
+	for (iTesImg = 0; iTesImg < NumTesImg; iTesImg++)
+	{
+		/* sprintf関数でファイル名を作成する */
+		sprintf(filename, "./test_data/d%d.pgm", iTesImg);
 
+		fp = fopen(filename, "rb"); //■ ファイルを開く
+		fgets(buff, SizeBuff, fp);	//■ ファイルの識別符号を読み込み
+		fgets(buff, SizeBuff, fp);	//■ 画像サイズの読み込み
+		fgets(buff, SizeBuff, fp);	//■ 最大輝度値の読み込み
 
-    for(Image=0;Image<100;Image++){
-	/* sprintf関数でファイル名を作成する */
-	sprintf(filename,"./test_data/d%d.pgm",Image);
-    
-	fp=fopen(filename, "rb" );            //■ ファイルを開く
-	fgets(buff,128,fp);                   //■ ファイルの識別符号を読み込み
-	fgets(buff,128,fp);                   //■ 画像サイズの読み込み
-	fgets(buff,128,fp);                   //■ 最大輝度値の読み込み
-    
-	//■ 画像データの読み込み
-	for(i=0;i<28;i++){
-	    for(j=0;j<28;j++){
-		Pix_tes[Image*DIM+i*28+j] = fgetc(fp);
-	    }
-	}
-	fclose(fp);
-    }
-
-    for(Image=0;Image<2000;Image++){
-	/* sprintf関数でファイル名を作成する */
-	sprintf(filename,"./train_data/d%d.pgm",Image);
-    
-	fp=fopen(filename, "rb" );            //■ ファイルを開く
-	fgets(buff,128,fp);                   //■ ファイルの識別符号を読み込み
-	fgets(buff,128,fp);                   //■ 画像サイズの読み込み
-	fgets(buff,128,fp);                   //■ 最大輝度値の読み込み
-    
-	//■ 画像データの読み込み
-	for(i=0;i<28;i++){
-	    for(j=0;j<28;j++){
-		Pix_tr[Image*DIM+i*28+j] = fgetc(fp);
-	    }
-	}
-	fclose(fp);
-    }
-
-
-    //■ ラベルデータの読み込み
-    fp=fopen("test_label.txt", "rb" );
-    for(i=0;i<100;i++){
-	fgets(buff,128,fp);
-	sscanf(buff,"%d",&tes_label[i]);
-    }
-    fp=fopen("train_label.txt", "rb" );
-    for(i=0;i<2000;i++){
-	fgets(buff,128,fp);
-	sscanf(buff,"%d",&tr_label[i]);
-    }
-
-    // 白黒反転
-    for(Image=0;Image<100;Image++){
-	for(i=0;i<28;i++){
-	    for(j=0;j<28;j++){
-		tes_vec[Image*DIM+i*28+j] = 
-		    (255 - Pix_tes[Image*DIM+i*28+j]) / 255.0;
-	    }
-	}
-    }
-    for(Image=0;Image<2000;Image++){
-	for(i=0;i<28;i++){
-	    for(j=0;j<28;j++){
-		tr_vec[Image*DIM+i*28+j] = 
-		    (255 - Pix_tr[Image*DIM+i*28+j]) / 255.0;
-	    }
-	}
-    }
-
-    // ベクトル 正規化
-
-    for(Image=0;Image<100;Image++){
-	fsum = 0;
-	for(i=0;i<DIM;i++){
-	    fsum += tes_vec[Image*DIM+i];
-	}
-	for(i=0;i<DIM;i++){
-	    tes_vec[Image*DIM+i] /= fsum;
-	}
-    }
-    for(Image=0;Image<2000;Image++){
-	fsum = 0;
-	for(i=0;i<DIM;i++){
-	    fsum += tr_vec[Image*DIM+i];
-	}
-	for(i=0;i<DIM;i++){
-	    tr_vec[Image*DIM+i] /= fsum;
-	}
-    }
-
-
-    //■ 距離計算
-
-    for(tes_i=0;tes_i<1;tes_i++){
-
-
-	for(tr_i=0;tr_i<2000;tr_i++){
-	    fsum=0;
-	    for(i=0;i<DIM;i++){
-		fsum += (tes_vec[tes_i*DIM+i]-tr_vec[tr_i*DIM+i])
-		    *(tes_vec[tes_i*DIM+i]-tr_vec[tr_i*DIM+i]);
-	    }
-	    dist_no[tr_i] = tr_i;
-	    dist_val[tr_i] = fsum;
-	    dist_class[tr_i] = tr_label[tr_i];
-	}
-
-
-	for(k=0;k<2000-1;k++){  //小さい順にソートする
-	    for( i=k+1 ; i<2000 ; i++){
-		if( dist_val[k] > dist_val[i] ){
-		    dist_nobuf = dist_no[k];
-		    dist_no[k] = dist_no[i];
-		    dist_no[i] = dist_nobuf;
-
-		    dist_valbuf = dist_val[k];
-		    dist_val[k] = dist_val[i];
-		    dist_val[i] = dist_valbuf;
-
-		    dist_classbuf = dist_class[k];
-		    dist_class[k] = dist_class[i];
-		    dist_class[i] = dist_classbuf;
+		//■ 画像データの読み込み
+		for (iRow = 0; iRow < SizeRow; iRow++)
+		{
+			for (iCol = 0; iCol < SizeCol; iCol++)
+			{
+				Pix_tes[iTesImg * DIM + iRow * SizeCol + iCol] = fgetc(fp);
+			}
 		}
-	    }
+		fclose(fp);
 	}
 
-	for(j=0;j<2000;j++){
-	    printf("order %3d  lab:%d  val:%.4f  dataNo.:%d\n", 
-	       j+1, dist_class[j], sqrt(dist_val[j]), dist_no[j]+1);
+	for (iTrImg = 0; iTrImg < NumTrImg; iTrImg++)
+	{
+		/* sprintf関数でファイル名を作成する */
+		sprintf(filename, "./train_data/d%d.pgm", iTrImg);
+
+		fp = fopen(filename, "rb"); //■ ファイルを開く
+		fgets(buff, SizeBuff, fp);	//■ ファイルの識別符号を読み込み
+		fgets(buff, SizeBuff, fp);	//■ 画像サイズの読み込み
+		fgets(buff, SizeBuff, fp);	//■ 最大輝度値の読み込み
+
+		//■ 画像データの読み込み
+		for (iRow = 0; iRow < SizeRow; iRow++)
+		{
+			for (iCol = 0; iCol < SizeCol; iCol++)
+			{
+				Pix_tr[iTrImg * DIM + iRow * SizeCol + iCol] = fgetc(fp);
+			}
+		}
+		fclose(fp);
 	}
 
-    }
-    return(0);
+	//■ ラベルデータの読み込み
+	fp = fopen("test_label.txt", "rb");
+	for (iTesImg = 0; iTesImg < NumTesImg; iTesImg++)
+	{
+		fgets(buff, SizeBuff, fp);
+		sscanf(buff, "%d", &tes_label[iTesImg]);
+	}
+	fp = fopen("train_label.txt", "rb");
+	for (iTrImg = 0; iTrImg < NumTrImg; iTrImg++)
+	{
+		fgets(buff, SizeBuff, fp);
+		sscanf(buff, "%d", &tr_label[iTrImg]);
+	}
+
+	// 白黒反転
+	for (iTesImg = 0; iTesImg < NumTesImg; iTesImg++)
+	{
+		for (iRow = 0; iRow < SizeRow; iRow++)
+		{
+			for (iCol = 0; iCol < SizeCol; iCol++)
+			{
+				tes_vec[iTesImg * DIM + iRow * SizeCol + iCol] =
+					(WHITE - (double)Pix_tes[iTesImg * DIM + iRow * SizeCol + iCol]) / WHITE;
+			}
+		}
+	}
+	for (iTrImg = 0; iTrImg < NumTrImg; iTrImg++)
+	{
+		for (iRow = 0; iRow < SizeRow; iRow++)
+		{
+			for (iCol = 0; iCol < SizeCol; iCol++)
+			{
+				tr_vec[iTrImg * DIM + iRow * SizeCol + iCol] =
+					(WHITE - (double)Pix_tr[iTrImg * DIM + iRow * SizeCol + iCol]) / WHITE;
+			}
+		}
+	}
+
+	// ベクトル 正規化
+
+	for (iTesImg = 0; iTesImg < NumTesImg; iTesImg++)
+	{
+		fsum = 0;
+		for (iDim = 0; iDim < DIM; iDim++)
+		{
+			fsum += tes_vec[iTesImg * DIM + iDim];
+		}
+		for (iDim = 0; iDim < DIM; iDim++)
+		{
+			tes_vec[iTesImg * DIM + iDim] /= fsum;
+		}
+	}
+	for (iTrImg = 0; iTrImg < NumTrImg; iTrImg++)
+	{
+		fsum = 0;
+		for (iDim = 0; iDim < DIM; iDim++)
+		{
+			fsum += tr_vec[iTrImg * DIM + iDim];
+		}
+		for (iDim = 0; iDim < DIM; iDim++)
+		{
+			tr_vec[iTrImg * DIM + iDim] /= fsum;
+		}
+	}
+
+	//■ 距離計算
+
+	for (iTesImg = 0; iTesImg < NumTesImg; iTesImg++)
+	{
+
+		for (iTrImg = 0; iTrImg < NumTrImg; iTrImg++)
+		{
+			fsum = 0;
+			for (iDim = 0; iDim < DIM; iDim++)
+			{
+				fsum += (tes_vec[iTesImg * DIM + iDim] - tr_vec[iTrImg * DIM + iDim]) * (tes_vec[iTesImg * DIM + iDim] - tr_vec[iTrImg * DIM + iDim]);
+			}
+			dist_no[iTrImg] = iTrImg;
+			dist_val[iTrImg] = fsum;
+			dist_class[iTrImg] = tr_label[iTrImg];
+		}
+
+		for (p = 0; p < NumTrImg - 1; p++)
+		{ //小さい順にソートする
+			for (q = p + 1; q < NumTrImg; q++)
+			{
+				if (dist_val[p] > dist_val[q])
+				{
+					int_pswap(dist_no,p,q);
+					double_pswap(dist_val,p,q);
+					int_pswap(dist_class,p,q);
+				}
+			}
+		}
+
+		for (iTrImg = 0; iTrImg < NumTrImg; iTrImg++)
+		{
+			printf("order %3d  lab:%d  val:%.4f  dataNo.:%d\n",
+				   iTrImg + 1, dist_class[iTrImg], sqrt(dist_val[iTrImg]), dist_no[iTrImg] + 1);
+		}
+	}
+	return 0;
+}
+
+void int_pswap(int* ptr, int p, int q)
+{
+	int buf;
+	buf = ptr[p];
+	ptr[p] = ptr[q];
+	ptr[q] = buf;
+}
+
+void double_pswap(double* ptr, int p, int q)
+{
+	double buf;
+	buf = ptr[p];
+	ptr[p] = ptr[q];
+	ptr[q] = buf;
 }
