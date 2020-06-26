@@ -1,0 +1,29 @@
+{
+    "configurations": [
+        {
+            "name": "Win64",
+            "includePath": [
+                "${workspaceFolder}",
+                "c:\\TDM-GCC-64\\include",
+                "C:\\TDM-GCC-64\\x86_64-w64-mingw32\\include"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "c:\\TDM-GCC-64\\bin\\gcc.exe",
+            "cStandard": "c11",
+            "compilerArgs": [
+                "-W",
+                "-Wall",
+                "-Wextra",
+                "-O5",
+                "-ggdb",
+                "-fexec-charset=CP932"
+            ]
+        }
+    ],
+    "version": 4
+}
