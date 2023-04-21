@@ -56,7 +56,7 @@
 - ここでは実際に数字パターンを $100$ 枚読み込んでみる．
 - 準備として以下のファイルをダウンロードしよう．
 
-  [100枚の手書き数字の画像データ](./datasets/MNIST/test/images/)
+  [100枚の手書き数字の画像データ](./datasets/MNIST/test100/images.zip)
 
 - ダウンロードしたら複数の画像データをプログラムによって読み込み，各画像の画素値を配列に格納するプログラムを作成しよう（画像サイズは $28\times 28$）．
 
@@ -89,7 +89,7 @@
 
 > ### sample2 （画像間の距離と同時に画像のラベルを表示するプログラム：[dist_sample2.c](./sample_codes/clang/dist_sample2.c)）
 > > $100$ 枚の文字画像に対するラベル（どの数字が書かれているかを示す情報）を読み込み、 プログラム中で利用できるようにする。
-> - [$100$ 枚の文字画像に対するラベルファイル](./datasets/MNIST/test/label.txt) をホームページのStep5の 部分からダウンロードしておく。
+> - [$100$ 枚の文字画像に対するラベルファイル](./datasets/MNIST/test100/label.txt) をホームページのStep5の 部分からダウンロードしておく。
 > - プログラム中で、文字画像に加えてラベルファイルを読み込む。
 > - 上記２で作成したプログラムにおいて、対象とした画像が何という数字であるかを 距離と同時に表示するように改変する。
 
@@ -107,15 +107,15 @@
 - さらに $1000$ 枚のテストデータを識別して正答率を算出してみよう．
 
   > $2000$ 枚の学習データ（training data）：
-  > - 画像:[pgm](./datasets/MNIST/train2000/images/)
+  > - 画像:[pgm](./datasets/MNIST/train2000/images.zip)
   > - ラベル：[txt](./datasets/MNIST/train2000/label.txt)
 
   > $100$ 枚のテストデータ（test data）：
-  > - 画像:[pgm](./datasets/MNIST/test100/images/)
+  > - 画像:[pgm](./datasets/MNIST/test100/images.zip)
   > - ラベル：[txt](./datasets/MNIST/test100/label.txt)
 
   > $1000$ 枚のテストデータ（test data 1000）：
-  > - 画像:[pgm](./datasets/MNIST/test1000/images/)
+  > - 画像:[pgm](./datasets/MNIST/test1000/images.zip)
   > - ラベル：[txt](./datasets/MNIST/test1000/label.txt)
 
   > C言語では，大きな配列を静的に確保しようとすると，コンパイル時または実行時にエラーとなる場合がある．そのときは，`malloc` (または`calloc`)を用いてメモリを動的に確保するとよい．
