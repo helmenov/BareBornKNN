@@ -188,7 +188,7 @@
             - 間違い率(Mistake) : $1-Precision$
         - 再現率(Recall)： $\frac{TP}{Target}$
             - 見逃し率(Miss) : $1-Recall$
-        - F1 ： $\frac{1}{F1} = \frac{1}{2}\left\{\frac{1}{精度}+\frac{1}{再現率}\right\}$
+        - F1 ： $\frac{1}{F1} = \frac{1}{2}\left(\frac{1}{精度}+\frac{1}{再現率}\right)$
             - 精度と再現率の調和平均
         -
 - 赤がテストデータに対するエラー率，青が学習データに対するエラー率を示す．
